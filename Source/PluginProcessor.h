@@ -22,7 +22,7 @@ struct ChainSettings
 {
     float peakFreq{ 0 }, peakGainInDecibels{ 0 }, peakQuality{ 1.f };
     float lowCutFreq{ 0 }, highCutFreq{ 0 };
-    int lowCutSlope{ Slope::Slope_12 }, highCutSlope{ Slope::Slope_12 };
+    Slope lowCutSlope{ Slope::Slope_12 }, highCutSlope{ Slope::Slope_12 };
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
@@ -95,6 +95,90 @@ private:
     using Coefficience = Filter::CoefficientsPtr;
 
     void updateCoefficience(Coefficience &old, const Coefficience &replacement);
+
+    template<typename ChainType, typename CoefficientType>
+    void updateCutFilter(ChainType& leftLowCut, 
+                         const CoefficientType cutCoefficience, const Slope& lowCutSlope)
+    {
+
+
+        leftLowCut.template setBypassed<0>(true);
+        leftLowCut.template setBypassed<1>(true);
+        leftLowCut.template setBypassed<2>(true);
+        leftLowCut.template setBypassed<3>(true);
+
+        switch (lowCutSlope)
+        {
+        case Slope_12:
+            *leftLowCut.template get<0>().coefficients = *cutCoefficience[0];
+            leftLowCut.template setBypassed<0>(false);
+            break;
+        case Slope_24:
+            *leftLowCut.template get<0>().coefficients = *cutCoefficience[0];
+            leftLowCut.template setBypassed<0>(false);
+            *leftLowCut.template get<1>().coefficients = *cutCoefficience[1];
+            leftLowCut.template setBypassed<0>(false);
+            break;
+        case Slope_36:
+            *leftLowCut.template get<0>().coefficients = *cutCoefficience[0];
+            leftLowCut.template setBypassed<0>(false);
+            *leftLowCut.template get<1>().coefficients = *cutCoefficience[1];
+            leftLowCut.template setBypassed<0>(false);
+            *leftLowCut.template get<2>().coefficients = *cutCoefficience[2];
+            leftLowCut.template setBypassed<0>(false);
+            break;
+        case Slope_48:
+            *leftLowCut.template get<0>().coefficients = *cutCoefficience[0];
+            leftLowCut.template setBypassed<0>(false);
+            *leftLowCut.template get<1>().coefficients = *cutCoefficience[1];
+            leftLowCut.template setBypassed<0>(false);
+            *leftLowCut.template get<2>().coefficients = *cutCoefficience[2];
+            leftLowCut.template setBypassed<0>(false);
+            *leftLowCut.template get<3>().coefficients = *cutCoefficience[3];
+            leftLowCut.template setBypassed<0>(false);
+            break;
+        }
+
+        /**
+
+        rightLowCut.setBypassed<0>(true);
+        rightLowCut.setBypassed<1>(true);
+        rightLowCut.setBypassed<2>(true);
+        rightLowCut.setBypassed<3>(true);
+
+        switch (chainSettings.lowCutSlope)
+        {
+        case Slope_12:
+            *rightLowCut.get<0>().coefficients = *cutCoefficience[0];
+            rightLowCut.setBypassed<0>(false);
+            break;
+        case Slope_24:
+            *rightLowCut.get<0>().coefficients = *cutCoefficience[0];
+            rightLowCut.setBypassed<0>(false);
+            *rightLowCut.get<1>().coefficients = *cutCoefficience[1];
+            rightLowCut.setBypassed<1>(false);
+            break;
+        case Slope_36:
+            *rightLowCut.get<0>().coefficients = *cutCoefficience[0];
+            rightLowCut.setBypassed<0>(false);
+            *rightLowCut.get<1>().coefficients = *cutCoefficience[1];
+            rightLowCut.setBypassed<1>(false);
+            *rightLowCut.get<2>().coefficients = *cutCoefficience[2];
+            rightLowCut.setBypassed<2>(false);
+            break;
+        case Slope_48:
+            *rightLowCut.get<0>().coefficients = *cutCoefficience[0];
+            rightLowCut.setBypassed<0>(false);
+            *rightLowCut.get<0>().coefficients = *cutCoefficience[0];
+            rightLowCut.setBypassed<0>(false);
+            *rightLowCut.get<2>().coefficients = *cutCoefficience[2];
+            rightLowCut.setBypassed<2>(false);
+            *rightLowCut.get<3>().coefficients = *cutCoefficience[3];
+            rightLowCut.setBypassed<3>(false);
+            break;
+        }*/
+
+    }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEQAudioProcessor)
