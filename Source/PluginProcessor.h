@@ -91,6 +91,7 @@ private:
     };
 
     using Coefficience = Filter::CoefficientsPtr;
+
     void updatePeakFilter(ChainSettings& chainSettings);
     void updateCoefficience(Coefficience &old, const Coefficience &replacement);
 
