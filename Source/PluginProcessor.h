@@ -42,6 +42,7 @@ using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
 using MonoChain = juce::dsp::ProcessorChain<CutFilter, CutFilter, Filter>;
 
 using Coefficience = Filter::CoefficientsPtr;
+
 void updateCoefficience(Coefficience& old, const Coefficience& replacement);
 
 Coefficience makePeakFilter(const ChainSettings& chainSettings, double sampleRate);
@@ -55,14 +56,14 @@ void update(ChainType& chain, const CoefficientType& coefficients)
 
 template<typename ChainType, typename CoefficientType>
 void updateCutFilter(ChainType& chain,
-    const CoefficientType coefficiences, const Slope& lowCutSlope)
+    const CoefficientType coefficiences, const Slope& cutSlope)
 {
     chain.template setBypassed<0>(true);
     chain.template setBypassed<1>(true);
     chain.template setBypassed<2>(true);
     chain.template setBypassed<3>(true);
 
-    switch (lowCutSlope)
+    switch (cutSlope)
     {
     case Slope_48:
         update<3>(chain, coefficiences);
@@ -143,11 +144,8 @@ public:
 
 private:
     MonoChain leftChain, rightChain;
-
     
     void updatePeakFilter(ChainSettings& chainSettings);
-
-   
 
     void updateHighCutFilters(const ChainSettings& chainSettings);
     void updateLowCutFilters(const ChainSettings& chainSettings);

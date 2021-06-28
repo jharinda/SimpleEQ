@@ -64,7 +64,7 @@ void SimpleEQAudioProcessorEditor::paint (juce::Graphics& g)
 
     auto& lowcut = monoChain.get<ChainPositions::LowCut>();
     auto& peak = monoChain.get<ChainPositions::Peak>();
-    auto& hightcut = monoChain.get<ChainPositions::HighCut>();
+    auto& highcut = monoChain.get<ChainPositions::HighCut>();
 
     auto sampleRate = audioProcessor.getSampleRate();
 
@@ -91,6 +91,18 @@ void SimpleEQAudioProcessorEditor::paint (juce::Graphics& g)
 
         if (!lowcut.isBypassed<3>())
             mag *= lowcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+
+        if (!highcut.isBypassed<0>())
+            mag *= highcut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+
+        if (!highcut.isBypassed<1>())
+            mag *= highcut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+
+        if (!highcut.isBypassed<2>())
+            mag *= highcut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+
+        if (!highcut.isBypassed<3>())
+            mag *= highcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
 
         mags[i] = Decibels::gainToDecibels(mag);
     }
@@ -150,11 +162,20 @@ void SimpleEQAudioProcessorEditor::timerCallback()
 {
     if (parametersChanged.compareAndSetBool(false, true))
     {
-       // 01:52:13 
+        //DBG("Params");
+
+        double sampleRate = audioProcessor.getSampleRate();
+
         auto chainSettings = getChainSettings(audioProcessor.apvts);
-        auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
+        auto peakCoefficients = makePeakFilter(chainSettings, sampleRate);
         updateCoefficience(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
     
+        auto lowCutCoefficients = makeLowCutFilter(chainSettings, sampleRate);
+        auto highCutCoefficients = makeHighCutFilter(chainSettings, sampleRate);
+
+        updateCutFilter(monoChain.get<ChainPositions::LowCut>(), lowCutCoefficients, chainSettings.lowCutSlope);
+        updateCutFilter(monoChain.get<ChainPositions::HighCut>(), highCutCoefficients, chainSettings.highCutSlope);
+
         repaint();
     }
 }
