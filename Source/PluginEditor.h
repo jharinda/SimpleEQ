@@ -80,6 +80,8 @@ private:
     SimpleEQAudioProcessor& audioProcessor;
 
     MonoChain monoChain;
+
+    void updateChain();
 };
 
 
