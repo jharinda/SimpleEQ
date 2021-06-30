@@ -104,6 +104,11 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 
     updateFilters();
 
+    leftChannelFifo.prepare(samplesPerBlock);
+    rightChannelFifo.prepare(samplesPerBlock);
+
+
+
 }
 
 Coefficience makePeakFilter(const ChainSettings& chainSettings, double sampleRate)
@@ -182,6 +187,9 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
 
     leftChain.process(leftContext);
     rightChain.process(rightContext);
+
+    leftChannelFifo.update(buffer);
+    rightChannelFifo.update(buffer);
 
 
 }
@@ -270,7 +278,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout SimpleEQAudioProcessor::crea
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq",
                                                            "LowCut Freq",
-                                                            juce::NormalisableRange<float> (20.f,20000.f,1.f,1.f),
+                                                            juce::NormalisableRange<float> (20.f,20000.f,1.f,0.25f),
                                                             20.f));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Freq",
